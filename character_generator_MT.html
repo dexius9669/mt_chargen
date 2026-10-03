@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Генератор Персонажей — Дикоземье</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Georgia', serif;
+  background: #1a1612;
+  color: #d4c5a0;
+  min-height: 100vh;
+  padding: 2rem;
+  line-height: 1.6;
+}
+.container { max-width: 800px; margin: 0 auto; }
+h1 {
+  text-align: center;
+  font-size: 2.2rem;
+  color: #c9a84c;
+  text-shadow: 0 0 10px rgba(201,168,76,0.3);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+}
+.subtitle {
+  text-align: center;
+  font-style: italic;
+  color: #8a7a5a;
+  margin-bottom: 2rem;
+}
+.section {
+  background: #231e18;
+  border: 1px solid #3d3428;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.section h2 {
+  color: #c9a84c;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #3d3428;
+  padding-bottom: 0.5rem;
+}
+.row { display: flex; gap: 1rem; flex-wrap: wrap; }
+.col { flex: 1; min-width: 200px; }
+label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: #a89878;
+  font-size: 0.9rem;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 0.6rem;
+  background: #1a1612;
+  border: 1px solid #3d3428;
+  color: #d4c5a0;
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 3px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #c9a84c;
+}
+textarea { resize: vertical; min-height: 60px; }
+.btn {
+  display: inline-block;
+  padding: 0.7rem 1.5rem;
+  background: #3d2e1a;
+  color: #c9a84c;
+  border: 1px solid #c9a84c;
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.btn:hover { background: #c9a84c; color: #1a1612; }
+.btn-block { display: block; width: 100%; text-align: center; }
+.result {
+  background: #1e1a14;
+  border: 1px solid #5a4a2a;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+.result h3 {
+  color: #c9a84c;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.aspect {
+  display: inline-block;
+  background: #2a2218;
+  border: 1px solid #5a4a2a;
+  padding: 0.3rem 0.7rem;
+  margin: 0.2rem;
+  border-radius: 3px;
+  font-style: italic;
+}
+.dice-result {
+  font-size: 1.4rem;
+  color: #c9a84c;
+  text-align: center;
+  padding: 0.5rem;
+  text-shadow: 0 0 8px rgba(201,168,76,0.4);
+}
+.dice-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.dice-item {
+  background: #1a1612;
+  border: 1px solid #3d3428;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 120px;
+}
+.dice-item .label { font-size: 0.75rem; color: #8a7a5a; }
+.dice-item .value { font-size: 1.2rem; color: #c9a84c; }
+.table-box {
+  background: #1a1612;
+  border: 1px solid #3d3428;
+  border-radius: 3px;
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+.table-box table { width: 100%; border-collapse: collapse; }
+.table-box th, .table-box td {
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #2a2218;
+  font-size: 0.85rem;
+}
+.table-box th { color: #c9a84c; }
+.highlight { color: #c9a84c; font-weight: bold; }
+.damage-track {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+.damage-pip {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #8a3a2a;
+  border-radius: 50%;
+  background: #4a1a1a;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: #8a3a2a;
+}
+.damage-pip:hover { border-color: #c9a84c; }
+.damage-pip.filled {
+  background: #8a3a2a;
+  border-color: #c04040;
+  box-shadow: 0 0 6px rgba(200,60,60,0.5);
+}
+.damage-pip.mental {
+  border-color: #5a3a8a;
+  background: #2a1a4a;
+}
+.damage-pip.mental:hover { border-color: #a070e0; }
+.damage-pip.mental.filled {
+  background: #5a3a8a;
+  border-color: #9060d0;
+  box-shadow: 0 0 6px rgba(140,80,200,0.5);
+}
+.penalty-display {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  color: #e8a040;
+}
+.penalty-display.danger { color: #e06040; }
+.inventory-slot {
+  background: #1a1612;
+  border: 1px dashed #3d3428;
+  padding: 0.4rem 0.7rem;
+  margin: 0.2rem 0;
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+.flavor-text {
+  font-style: italic;
+  color: #8a7a5a;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+.questions-list { list-style: none; }
+.questions-list li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #2a2218;
+}
+.questions-list li:before {
+  content: "✦ ";
+  color: #c9a84c;
+}
+.flex-center { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+  margin-left: 0.3rem;
+}
+.tag-warrior { background: #4a2a1a; color: #e8a040; }
+.tag-fragile { background: #1a2a4a; color: #60a0e8; }
+.tag-other { background: #2a3a1a; color: #80c040; }
+.magic-ref {
+  background: #1e1a2a;
+  border: 1px solid #4a3a6a;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+.magic-ref h4 {
+  color: #a080d0;
+  margin-bottom: 0.5rem;
+}
+.magic-ref ul { padding-left: 1.2rem; }
+.magic-ref li { margin-bottom: 0.3rem; font-size: 0.9rem; }
+.damage-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+.damage-checkbox input { display: none; }
+.check-pip {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #8a3a2a;
+  border-radius: 50%;
+  background: #4a1a1a;
+  transition: all 0.2s;
+}
+.damage-checkbox input:checked + .check-pip {
+  background: #c04040;
+  border-color: #e06040;
+  box-shadow: 0 0 6px rgba(200,60,60,0.5);
+}
+.damage-checkbox.mental .check-pip {
+  border-color: #5a3a8a;
+  background: #2a1a4a;
+}
+.damage-checkbox.mental input:checked + .check-pip {
+  background: #9060d0;
+  border-color: #b080f0;
+  box-shadow: 0 0 6px rgba(140,80,200,0.5);
+}
+.ref-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 600px) {
+  .ref-grid { grid-template-columns: 1fr; }
+}
+
+.d-none { display: none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>⚔ ДИКОЗЕМЬЕ ⚔</h1>
+<p class="subtitle">Генератор персонажей для «Могучего Татцельвурма»</p>
+
+<div class="section">
+<h2>1. Ответьте на вопросы</h2>
+<p class="flavor-text">Эти вопросы помогут раскрыть мотивацию и связи вашего персонажа. Держите их в уме, когда будете описывать Суть Героя.</p>
+<ul class="questions-list">
+  <li><strong>A.</strong> Почему вы не такой, как остальные, и ищете приключений?</li>
+  <li><strong>B.</strong> Почему вы в долгах?</li>
+  <li><strong>C.</strong> Каковы ваши отношения с другими искателями приключений?</li>
+  <li><strong>D.</strong> Что вы ищете в Дикоземье? Славу? Богатство? Бегство?</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>2. Суть Героя</h2>
+<label>Имя персонажа</label>
+<input type="text" id="char-name" placeholder="Имя..." style="margin-bottom:1rem;">
+<p class="flavor-text">Напишите несколько слов о вашем персонаже. Кто он? Откуда? Что привело его в эти суровые земли?</p>
+<textarea id="concept" rows="3" placeholder="Старый вояка, ищущий отмщения за свой уничтоженный орден..."></textarea>
+<div class="row" style="margin-top:1rem;">
+  <div class="col">
+    <label>Раса</label>
+    <select id="race">
+      <option value="Человек">Человек</option>
+      <option value="Эльф">Эльф</option>
+      <option value="Дварф">Дварф</option>
+      <option value="Полурослик">Полурослик</option>
+      <option value="Другая">Другая (своё)</option>
+    </select>
+  </div>
+  <div class="col">
+    <label>Тип персонажа (влияет на Урон)</label>
+    <select id="char-type">
+      <option value="3">Обычный (3 Урона)</option>
+      <option value="4">Воин (4 Урона)</option>
+      <option value="2">Хрупкий (2 Урона)</option>
+    </select>
+  </div>
+</div>
+
+<div class="section">
+<h2>3. Таблица Вдохновения <span class="tag tag-other">d66 × 3</span></h2>
+<p class="flavor-text">Бросьте d66 трижды для вдохновения. Используйте результаты как основу — придумайте свой Аспект самостоятельно.</p>
+<div class="flex-center" style="margin-bottom:1rem;">
+  <button class="btn" onclick="rollInspiration()">Бросить d66 × 3</button>
+</div>
+<div id="insp-results" class="dice-group" style="display:none;">
+  <div class="dice-item">
+    <div class="label">Прилагательное</div>
+    <div class="value" id="insp-adj">—</div>
+  </div>
+  <div class="dice-item">
+    <div class="label">Существительное</div>
+    <div class="value" id="insp-noun">—</div>
+  </div>
+  <div class="dice-item">
+    <div class="label">Роль</div>
+    <div class="value" id="insp-role">—</div>
+  </div>
+</div>
+<div style="margin-top:1rem;">
+  <label>Ваш Аспект (на основе выпавшего)</label>
+  <input type="text" id="aspect1" placeholder="Придумайте сами, используя вдохновение выше...">
+</div>
+<details>
+  <summary style="color:#8a7a5a; cursor:pointer; margin-top:0.5rem;">Показать полную таблицу</summary>
+  <div class="table-box">
+    <table>
+      <tr><th>d66</th><th>Прилагательное</th><th>Существительное</th><th>Роль</th></tr>
+      <tr><td>11</td><td>мускулистый</td><td>холм</td><td>искатель приключений</td></tr>
+      <tr><td>12</td><td>зачарованный</td><td>пустыня</td><td>волшебник</td></tr>
+      <tr><td>13</td><td>огромный</td><td>город</td><td>13-й рыцарь</td></tr>
+      <tr><td>14</td><td>рьяный</td><td>море</td><td>посвящённый</td></tr>
+      <tr><td>15</td><td>аристократичный</td><td>сон</td><td>алхимик</td></tr>
+      <tr><td>16</td><td>коварный</td><td>жук</td><td>дворянин</td></tr>
+      <tr><td>21</td><td>просветлённый</td><td>кости</td><td>друид</td></tr>
+      <tr><td>22</td><td>призрачный</td><td>солнце</td><td>искатель приключений</td></tr>
+      <tr><td>23</td><td>ловкий</td><td>луна</td><td>торговец</td></tr>
+      <tr><td>24</td><td>упорный</td><td>кристалл</td><td>трубадур</td></tr>
+      <tr><td>25</td><td>богатый</td><td>проклятие</td><td>гладиатор</td></tr>
+      <tr><td>26</td><td>мутировавший</td><td>дорога</td><td>плут</td></tr>
+      <tr><td>31</td><td>разрушительный</td><td>червь</td><td>ведьма</td></tr>
+      <tr><td>32</td><td>пророческий</td><td>птица</td><td>медик</td></tr>
+      <tr><td>33</td><td>пугающий</td><td>паразит</td><td>воин</td></tr>
+      <tr><td>34</td><td>древний</td><td>рыба</td><td>моряк</td></tr>
+      <tr><td>35</td><td>нечестивый</td><td>ящерица</td><td>жонглёр</td></tr>
+      <tr><td>36</td><td>священный</td><td>зверь</td><td>укротитель</td></tr>
+      <tr><td>41</td><td>убедительный</td><td>гора</td><td>кузнец</td></tr>
+      <tr><td>42</td><td>проницательный</td><td>река</td><td>забияка</td></tr>
+      <tr><td>43</td><td>находчивый</td><td>вода</td><td>инквизитор</td></tr>
+      <tr><td>44</td><td>настойчивый</td><td>огонь</td><td>искатель приключений</td></tr>
+      <tr><td>45</td><td>эрудированный</td><td>лед</td><td>пират</td></tr>
+      <tr><td>46</td><td>разносторонний</td><td>яд</td><td>чужеземец</td></tr>
+      <tr><td>51</td><td>обманчивый</td><td>чума</td><td>петушиный шарф</td></tr>
+      <tr><td>52</td><td>хитрый</td><td>плоть</td><td>маленький гигант</td></tr>
+      <tr><td>53</td><td>неумолимый</td><td>звезда</td><td>воин</td></tr>
+      <tr><td>54</td><td>призрачный</td><td>смерть</td><td>искатель приключений</td></tr>
+      <tr><td>55</td><td>зловещий</td><td>грибы</td><td>маг</td></tr>
+      <tr><td>56</td><td>тщеславный</td><td>призыв</td><td>секретный агент</td></tr>
+      <tr><td>61</td><td>пагубный</td><td>лоза</td><td>1-й капитан</td></tr>
+      <tr><td>62</td><td>упрямый</td><td>небо</td><td>варвар</td></tr>
+      <tr><td>63</td><td>статный</td><td>пещера</td><td>мистик</td></tr>
+      <tr><td>64</td><td>губительный</td><td>дух</td><td>изобретатель</td></tr>
+      <tr><td>65</td><td>счастливый</td><td>золото</td><td>монах</td></tr>
+      <tr><td>66</td><td>бронированный</td><td>тень</td><td>искатель приключений</td></tr>
+    </table>
+  </div>
+</details>
+</div>
+
+<div class="section">
+<h2>4. Культура <span class="tag tag-other">2d6</span></h2>
+<p class="flavor-text">Откуда родом ваш герой?</p>
+<div class="flex-center">
+  <button class="btn" onclick="rollCulture()">Бросить 2d6</button>
+  <div id="cult-result" class="dice-result">—</div>
+</div>
+<div id="cult-detail" class="table-box" style="display:none;">
+  <p><strong>Культура:</strong> <span id="cult-name" class="highlight"></span></p>
+  <p id="cult-desc"></p>
+</div>
+</div>
+
+<div class="section">
+<h2>5. Аспекты</h2>
+<p class="flavor-text">Опишите, что в вашем персонаже странного или крутого (второй Аспект), и на какого вымышленного/исторического персонажа он похож (третий Аспект).</p>
+<div class="row">
+  <div class="col">
+    <label>Второй Аспект (странное/крутое)</label>
+    <input type="text" id="aspect2" placeholder="Говорит с мёртвыми птицами...">
+  </div>
+  <div class="col">
+    <label>Третий Аспект (прообраз)</label>
+    <input type="text" id="aspect3" placeholder="Конан Варвар, Хастерт Так...">
+  </div>
+</div>
+</div>
+
+<div class="section">
+<h2>6. Важные предметы</h2>
+<p class="flavor-text">Выберите два важных предмета, которыми владеет ваш персонаж.</p>
+<div class="row">
+  <div class="col">
+    <label>Предмет 1</label>
+    <input type="text" id="item1" placeholder="Ржавый меч отца...">
+  </div>
+  <div class="col">
+    <label>Предмет 2</label>
+    <input type="text" id="item2" placeholder="Амулет из кости...">
+  </div>
+</div>
+</div>
+
+<div class="section">
+<h2>7. Инвентарь <span class="tag tag-other">6 слотов</span></h2>
+<p class="flavor-text">У вас есть шесть вещей, припрятанных при себе. Малочевидные мелочи — бесплатно.</p>
+<div class="row">
+  <div class="col">
+    <label>Слот 1</label><input type="text" id="inv1" placeholder="Верёвка (10м)">
+    <label>Слот 2</label><input type="text" id="inv2" placeholder="Факел">
+    <label>Слот 3</label><input type="text" id="inv3" placeholder="Кремень и кресало">
+  </div>
+  <div class="col">
+    <label>Слот 4</label><input type="text" id="inv4" placeholder="Сухпаёк (d6)">
+    <label>Слот 5</label><input type="text" id="inv5" placeholder="Кинжал">
+    <label>Слот 6</label><input type="text" id="inv6" placeholder="Кошель с 10 серебряными">
+  </div>
+</div>
+</div>
+
+<div class="section" style="text-align:center;">
+<button class="btn btn-block" onclick="generateCharacter()" style="font-size:1.2rem; padding:1rem;">⚒ СОЗДАТЬ ПЕРСОНАЖА ⚒</button>
+</div>
+<div style="text-align:center; margin-top:0.5rem;">
+  <button class="btn" onclick="clearCharacter()" style="font-size:0.85rem; padding:0.4rem 1rem;">🗑 Удалить сохранённого</button>
+  <span id="save-indicator" style="font-size:0.8rem; color:#6a8a4a; margin-left:0.5rem; display:none;">✓ сохранено</span>
+</div>
+
+<div id="output" class="result d-none">
+  <div id="char-output"></div>
+  <div style="text-align:center; margin-top:1.5rem; border-top:1px solid #3d3428; padding-top:1rem;" class="no-print">
+    <button class="btn" onclick="exportToMD()">📄 Экспорт в .md</button>
+  </div>
+</div>
+
+<div class="section" style="margin-top:2rem;">
+<h2>Справка</h2>
+<div class="ref-grid">
+<div>
+<h3 style="color:#a89878; font-size:1rem; margin-bottom:0.5rem;">Как играть</h3>
+<div class="table-box">
+  <table>
+    <tr><th>Бросок 2d6</th><th>Результат</th></tr>
+    <tr><td>2 (глаза змеи)</td><td>Катастрофа</td></tr>
+    <tr><td>3-6</td><td>Провал — случается что-то плохое</td></tr>
+    <tr><td>7-9</td><td>Частичный успех — с ценой или выбором</td></tr>
+    <tr><td>10-11</td><td>Полный успех</td></tr>
+    <tr><td>12 (две шестёрки)</td><td>Максимальный успех с блеском</td></tr>
+  </table>
+</div>
+<p class="flavor-text" style="margin-top:0.5rem;">Модификатор к броску определяется Судьёй от -2 до +2 на основе Аспектов персонажа и ситуации.</p>
+</div>
+<div>
+<h3 style="color:#a89878; font-size:1rem; margin-bottom:0.5rem;">Магия и Чудеса</h3>
+<div class="magic-ref">
+  <ul>
+    <li><strong>12</strong> — полный успех, все 4 опции позитивно</li>
+    <li><strong>10-11</strong> — 3 позитивные опции на выбор</li>
+    <li><strong>7-9</strong> — 2 позитивные опции на выбор</li>
+    <li><strong>3-6</strong> — Судья даёт 1 позитивную опцию</li>
+    <li><strong>2 (глаза змеи)</strong> — катастрофа</li>
+  </ul>
+  <h4 style="margin-top:0.8rem; font-size:0.9rem;">Опции (не выбрать = негатив):</h4>
+  <ul>
+    <li>Желаемое сбывается / не сбывается</li>
+    <li>Нет ментального урона / ментальный урон</li>
+    <li>Ничего странного / нечто невероятное</li>
+    <li>Нет побочек / серьёзные побочки</li>
+  </ul>
+  <p class="flavor-text" style="margin-top:0.5rem;">Штраф к магии = накопленный ментальный урон. При максимуме — магия недоступна до отдыха (8ч в безопасности).</p>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+const adj = {
+  11:'мускулистый',12:'зачарованный',13:'огромный',14:'рьяный',15:'аристократичный',16:'коварный',
+  21:'просветлённый',22:'призрачный',23:'ловкий',24:'упорный',25:'богатый',26:'мутировавший',
+  31:'разрушительный',32:'пророческий',33:'пугающий',34:'древний',35:'нечестивый',36:'священный',
+  41:'убедительный',42:'проницательный',43:'находчивый',44:'настойчивый',45:'эрудированный',46:'разносторонний',
+  51:'обманчивый',52:'хитрый',53:'неумолимый',54:'призрачный',55:'зловещий',56:'тщеславный',
+  61:'пагубный',62:'упрямый',63:'статный',64:'губительный',65:'счастливый',66:'бронированный'
+};
+const noun = {
+  11:'холм',12:'пустыня',13:'город',14:'море',15:'сон',16:'жук',
+  21:'кости',22:'солнце',23:'луна',24:'кристалл',25:'проклятие',26:'дорога',
+  31:'червь',32:'птица',33:'паразит',34:'рыба',35:'ящерица',36:'зверь',
+  41:'гора',42:'река',43:'вода',44:'огонь',45:'лед',46:'яд',
+  51:'чума',52:'плоть',53:'звезда',54:'смерть',55:'грибы',56:'призыв',
+  61:'лоза',62:'небо',63:'пещера',64:'дух',65:'золото',66:'тень'
+};
+const role = {
+  11:'искатель приключений',12:'волшебник',13:'13-й рыцарь',14:'посвящённый',15:'алхимик',16:'дворянин',
+  21:'друид',22:'искатель приключений',23:'торговец',24:'трубадур',25:'гладиатор',26:'плут',
+  31:'ведьма',32:'медик',33:'воин',34:'моряк',35:'жонглёр',36:'укротитель',
+  41:'кузнец',42:'забияка',43:'инквизитор',44:'искатель приключений',45:'пират',46:'чужеземец',
+  51:'петушиный шарф',52:'маленький гигант',53:'воин',54:'искатель приключений',55:'маг',56:'секретный агент',
+  61:'1-й капитан',62:'варвар',63:'мистик',64:'изобретатель',65:'монах',66:'искатель приключений'
+};
+
+const cultures = {
+  2: { name: 'Хорчи', desc: 'Умелые охотники, наездники и шаманы. Выживают в холодном климате. Представьте себе Монголию.' },
+  3: { name: 'Донархейм', desc: 'Волевые бойцы, пираты и суровые фермеры. Викинги этого мира.' },
+  4: { name: 'Центральная Империя', desc: 'Цивилизованный западный этикет, умелые ремесленники, учёные и волшебники. Германия периода Высокого Средневековья.' },
+  5: { name: 'Центральная Империя', desc: 'Цивилизованный западный этикет, умелые ремесленники, учёные и волшебники. Германия периода Высокого Средневековья.' },
+  6: { name: 'Центральная Империя', desc: 'Цивилизованный западный этикет, умелые ремесленники, учёные и волшебники. Германия периода Высокого Средневековья.' },
+  7: { name: 'Центральная Империя', desc: 'Цивилизованный западный этикет, умелые ремесленники, учёные и волшебники. Германия периода Высокого Средневековья.' },
+  8: { name: 'Центральная Империя', desc: 'Цивилизованный западный этикет, умелые ремесленники, учёные и волшебники. Германия периода Высокого Средневековья.' },
+  9: { name: 'Эльфы', desc: 'Животноводство, жизнь в гармонии с природой, волшебники.' },
+  10: { name: 'Пустыня Ша\'иф / Южные города-государства', desc: 'Умелые торговцы, фехтовальщики и волшебники. Хорошее чувство направления.' },
+  11: { name: 'Откуда-то ещё', desc: 'Придумайте свою культуру! Используйте Таблицу Вдохновения для описания.' },
+  12: { name: 'Откуда-то ещё', desc: 'Придумайте свою культуру! Используйте Таблицу Вдохновения для описания.' }
+};
+
+function rollD6() { return Math.floor(Math.random() * 6) + 1; }
+
+function rollInspiration() {
+  const d1 = rollD6() * 10 + rollD6();
+  const d2 = rollD6() * 10 + rollD6();
+  const d3 = rollD6() * 10 + rollD6();
+
+  document.getElementById('insp-adj').textContent = adj[d1] || '—';
+  document.getElementById('insp-noun').textContent = noun[d2] || '—';
+  document.getElementById('insp-role').textContent = role[d3] || '—';
+  document.getElementById('insp-results').style.display = 'flex';
+}
+
+function rollCulture() {
+  const total = rollD6() + rollD6();
+  const cult = cultures[total];
+  document.getElementById('cult-result').textContent = total;
+  document.getElementById('cult-name').textContent = cult.name;
+  document.getElementById('cult-desc').textContent = cult.desc;
+  document.getElementById('cult-detail').style.display = 'block';
+}
+
+function generateCharacter() {
+  const concept = document.getElementById('concept').value.trim() || '';
+  const race = document.getElementById('race').value;
+  const charType = parseInt(document.getElementById('char-type').value);
+  const aspect1 = document.getElementById('aspect1').value.trim() || '';
+  const aspect2 = document.getElementById('aspect2').value.trim() || '';
+  const aspect3 = document.getElementById('aspect3').value.trim() || '';
+  const item1 = document.getElementById('item1').value.trim() || '';
+  const item2 = document.getElementById('item2').value.trim() || '';
+  const culture = document.getElementById('cult-name')?.textContent || '';
+  const inspAdj = document.getElementById('insp-adj')?.textContent || '';
+  const inspNoun = document.getElementById('insp-noun')?.textContent || '';
+  const inspRole = document.getElementById('insp-role')?.textContent || '';
+
+  const typeLabels = { 2: 'Хрупкий', 3: 'Обычный', 4: 'Воин' };
+
+  let inv = [];
+  for (let i = 1; i <= 6; i++) {
+    const v = document.getElementById('inv' + i).value.trim();
+    if (v) inv.push(v);
+  }
+  while (inv.length < 6) inv.push('');
+
+  let html = `
+    <div class="row" style="margin-bottom:1rem;">
+      <div class="col"><label>Имя персонажа</label><input type="text" id="sheet-char-name" value="${document.getElementById('char-name').value || concept.split(' ')[0] || ''}" placeholder="Имя..."></div>
+      <div class="col"><label>Раса</label><input type="text" value="${race}"></div>
+    </div>
+    <div class="row" style="margin-bottom:1rem;">
+      <div class="col"><label>Культура</label><input type="text" value="${culture}"></div>
+      <div class="col"><label>Тип</label><input type="text" value="${typeLabels[charType]}"></div>
+    </div>
+
+    <h4 style="color:#a89878; margin:1rem 0 0.5rem;">Концепт</h4>
+    <textarea rows="2" style="width:100%; margin-bottom:1rem;">${concept}</textarea>
+
+    ${inspAdj ? `
+    <h4 style="color:#a89878; margin:1rem 0 0.5rem;">Вдохновение (d66 × 3)</h4>
+    <p>Прилагательное: <span class="highlight">${inspAdj}</span> | Существительное: <span class="highlight">${inspNoun}</span> | Роль: <span class="highlight">${inspRole}</span></p>
+    ` : ''}
+
+    <h4 style="color:#a89878; margin:1rem 0 0.5rem;">Аспекты</h4>
+    <div class="row" style="margin-bottom:1rem;">
+      <div class="col"><label>Аспект 1</label><input type="text" value="${aspect1}"></div>
+      <div class="col"><label>Аспект 2</label><input type="text" value="${aspect2}"></div>
+    </div>
+    <div style="margin-bottom:1rem;"><label>Аспект 3</label><input type="text" value="${aspect3}"></div>
+
+    <h4 style="color:#a89878; margin:1rem 0 0.5rem;">Урон (${charType} макс.)</h4>
+    <div class="damage-track" id="sheet-damage-track">
+      ${Array.from({length: charType}, (_, i) => `<label class="damage-checkbox"><input type="checkbox" data-damage="${i+1}"><span class="check-pip"></span></label>`).join('')}
+    </div>
+    <div id="sheet-damage-penalty" class="penalty-display"></div>
+
+    <h4 style="color:#a89878; margin:1rem 0 0.5rem;">Ментальный урон (макс. 4)</h4>
+    <div class="damage-track" id="sheet-mental-track">
+      ${Array.from({length: 4}, (_, i) => `<label class="damage-checkbox mental"><input type="checkbox" data-mental="${i+1}"><span class="check-pip"></span></label>`).join('')}
+    </div>
+    <div id="sheet-mental-penalty" class="penalty-display"></div>
+
+    <h4 style="color:#a89878; margin:1rem 0 0.5rem;">Важные предметы</h4>
+    <div class="row" style="margin-bottom:1rem;">
+      <div class="col"><label>Предмет 1</label><input type="text" value="${item1}"></div>
+      <div class="col"><label>Предмет 2</label><input type="text" value="${item2}"></div>
+    </div>
+
+    <h4 style="color:#a89878; margin:1rem 0 0.5rem;">Инвентарь</h4>
+    <div class="row" style="margin-bottom:1rem;">
+      <div class="col">
+        ${inv.slice(0,3).map((v, i) => `<label>Слот ${i+1}</label><input type="text" value="${v}">`).join('')}
+      </div>
+      <div class="col">
+        ${inv.slice(3,6).map((v, i) => `<label>Слот ${i+4}</label><input type="text" value="${v}">`).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('char-output').innerHTML = html;
+  document.getElementById('output').classList.remove('d-none');
+
+  document.querySelectorAll('#sheet-damage-track input').forEach(cb => {
+    cb.addEventListener('change', updateSheetDamage);
+  });
+  document.querySelectorAll('#sheet-mental-track input').forEach(cb => {
+    cb.addEventListener('change', updateSheetMental);
+  });
+  updateSheetDamage();
+  updateSheetMental();
+
+  saveCharacter();
+  document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateSheetDamage() {
+  const total = document.querySelectorAll('#sheet-damage-track input').length;
+  const filled = document.querySelectorAll('#sheet-damage-track input:checked').length;
+  const remaining = total - filled;
+  const el = document.getElementById('sheet-damage-penalty');
+  if (remaining === 0) {
+    el.textContent = 'ВСЕ ЯЧЕЙКИ ЗАПОЛНЕНЫ — персонаж мёртв или без сознания!';
+    el.className = 'penalty-display danger';
+  } else if (remaining === 1) {
+    el.textContent = '⚠ Ранен! Остался 1 Урон. Нужно заняться лечением!';
+    el.className = 'penalty-display danger';
+  } else {
+    el.textContent = `Осталось Урона: ${remaining}/${total}`;
+    el.className = 'penalty-display';
+  }
+}
+
+function updateSheetMental() {
+  const filled = document.querySelectorAll('#sheet-mental-track input:checked').length;
+  const el = document.getElementById('sheet-mental-penalty');
+  if (filled === 4) {
+    el.textContent = '⚠ МАКСИМУМ ментального урона! Магия недоступна до отдыха (8ч в безопасности).';
+    el.className = 'penalty-display danger';
+  } else if (filled > 0) {
+    el.textContent = `Штраф к броскам на магию: -${filled}`;
+    el.className = 'penalty-display';
+  } else {
+    el.textContent = 'Ментальный урон: 0 (чистый разум)';
+    el.className = 'penalty-display';
+  }
+}
+
+function saveCharacter() {
+  const data = {
+    charName: document.getElementById('char-name').value,
+    concept: document.getElementById('concept').value,
+    race: document.getElementById('race').value,
+    charType: document.getElementById('char-type').value,
+    aspect1: document.getElementById('aspect1').value,
+    aspect2: document.getElementById('aspect2').value,
+    aspect3: document.getElementById('aspect3').value,
+    item1: document.getElementById('item1').value,
+    item2: document.getElementById('item2').value,
+    inv1: document.getElementById('inv1').value,
+    inv2: document.getElementById('inv2').value,
+    inv3: document.getElementById('inv3').value,
+    inv4: document.getElementById('inv4').value,
+    inv5: document.getElementById('inv5').value,
+    inv6: document.getElementById('inv6').value,
+    cultName: document.getElementById('cult-name')?.textContent || '',
+    cultDesc: document.getElementById('cult-desc')?.textContent || '',
+    inspAdj: document.getElementById('insp-adj')?.textContent || '',
+    inspNoun: document.getElementById('insp-noun')?.textContent || '',
+    inspRole: document.getElementById('insp-role')?.textContent || '',
+    sheetHTML: document.getElementById('char-output').innerHTML,
+    damageChecked: Array.from(document.querySelectorAll('#sheet-damage-track input')).map(cb => cb.checked),
+    mentalChecked: Array.from(document.querySelectorAll('#sheet-mental-track input')).map(cb => cb.checked),
+  };
+  localStorage.setItem('tatzelwurm_character', JSON.stringify(data));
+  const ind = document.getElementById('save-indicator');
+  if (ind) {
+    ind.style.display = 'inline';
+    setTimeout(() => { ind.style.display = 'none'; }, 1500);
+  }
+}
+
+function loadCharacter() {
+  const raw = localStorage.getItem('tatzelwurm_character');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    document.getElementById('char-name').value = data.charName || '';
+    document.getElementById('concept').value = data.concept || '';
+    document.getElementById('race').value = data.race || 'Человек';
+    document.getElementById('char-type').value = data.charType || '3';
+    document.getElementById('aspect1').value = data.aspect1 || '';
+    document.getElementById('aspect2').value = data.aspect2 || '';
+    document.getElementById('aspect3').value = data.aspect3 || '';
+    document.getElementById('item1').value = data.item1 || '';
+    document.getElementById('item2').value = data.item2 || '';
+    document.getElementById('inv1').value = data.inv1 || '';
+    document.getElementById('inv2').value = data.inv2 || '';
+    document.getElementById('inv3').value = data.inv3 || '';
+    document.getElementById('inv4').value = data.inv4 || '';
+    document.getElementById('inv5').value = data.inv5 || '';
+    document.getElementById('inv6').value = data.inv6 || '';
+    if (data.cultName) {
+      const cn = document.getElementById('cult-name');
+      const cd = document.getElementById('cult-desc');
+      const cdDetail = document.getElementById('cult-detail');
+      if (cn) cn.textContent = data.cultName;
+      if (cd) cd.textContent = data.cultDesc;
+      if (cdDetail) cdDetail.style.display = 'block';
+    }
+    if (data.inspAdj) {
+      const a = document.getElementById('insp-adj');
+      const n = document.getElementById('insp-noun');
+      const r = document.getElementById('insp-role');
+      const res = document.getElementById('insp-results');
+      if (a) a.textContent = data.inspAdj;
+      if (n) n.textContent = data.inspNoun;
+      if (r) r.textContent = data.inspRole;
+      if (res) res.style.display = 'flex';
+    }
+    if (data.sheetHTML) {
+      document.getElementById('char-output').innerHTML = data.sheetHTML;
+      document.getElementById('output').classList.remove('d-none');
+      document.querySelectorAll('#sheet-damage-track input').forEach((cb, i) => {
+        cb.checked = data.damageChecked?.[i] || false;
+        cb.addEventListener('change', updateSheetDamage);
+      });
+      document.querySelectorAll('#sheet-mental-track input').forEach((cb, i) => {
+        cb.checked = data.mentalChecked?.[i] || false;
+        cb.addEventListener('change', updateSheetMental);
+      });
+      updateSheetDamage();
+      updateSheetMental();
+    }
+  } catch (e) {
+    console.warn('Failed to load character:', e);
+  }
+}
+
+function clearCharacter() {
+  if (!confirm('Удалить сохранённого персонажа?')) return;
+  localStorage.removeItem('tatzelwurm_character');
+  location.reload();
+}
+
+function exportToMD() {
+  const name = document.getElementById('char-name').value.trim() || 'Безымянный';
+  const concept = document.getElementById('concept').value.trim() || '';
+  const race = document.getElementById('race').value;
+  const charType = parseInt(document.getElementById('char-type').value);
+  const aspect1 = document.getElementById('aspect1').value.trim() || '—';
+  const aspect2 = document.getElementById('aspect2').value.trim() || '—';
+  const aspect3 = document.getElementById('aspect3').value.trim() || '—';
+  const item1 = document.getElementById('item1').value.trim() || '—';
+  const item2 = document.getElementById('item2').value.trim() || '—';
+  const culture = document.getElementById('cult-name')?.textContent || '—';
+  const inspAdj = document.getElementById('insp-adj')?.textContent || '';
+  const inspNoun = document.getElementById('insp-noun')?.textContent || '';
+  const inspRole = document.getElementById('insp-role')?.textContent || '';
+
+  const typeLabels = { 2: 'Хрупкий', 3: 'Обычный', 4: 'Воин' };
+
+  let inv = [];
+  for (let i = 1; i <= 6; i++) {
+    const v = document.getElementById('inv' + i).value.trim();
+    inv.push(v || '—');
+  }
+
+  let md = `# ${name}
+
+## Основное
+
+| Параметр | Значение |
+|----------|----------|
+| Имя | ${name} |
+| Раса | ${race} |
+| Культура | ${culture} |
+| Тип | ${typeLabels[charType]} |
+| Урон | ${charType} макс. |
+| Ментальный урон | 4 макс. |
+
+`;
+
+  if (inspAdj) {
+    md += `## Вдохновение (d66 × 3)
+
+- **Прилагательное:** ${inspAdj}
+- **Существительное:** ${inspNoun}
+- **Роль:** ${inspRole}
+
+`;
+  }
+
+  md += `## Концепт
+
+${concept || '—'}
+
+## Аспекты
+
+1. ${aspect1}
+2. ${aspect2}
+3. ${aspect3}
+
+## Важные предметы
+
+1. ${item1}
+2. ${item2}
+
+## Инвентарь
+
+| Слот | Предмет |
+|------|---------|
+| 1 | ${inv[0]} |
+| 2 | ${inv[1]} |
+| 3 | ${inv[2]} |
+| 4 | ${inv[3]} |
+| 5 | ${inv[4]} |
+| 6 | ${inv[5]} |
+
+## Урон (${charType} макс.)
+
+${Array.from({length: charType}, (_, i) => `- [ ] Ячейка ${i+1}`).join('\n')}
+
+## Ментальный урон (4 макс.)
+
+- [ ] Ячейка 1
+- [ ] Ячейка 2
+- [ ] Ячейка 3
+- [ ] Ячейка 4
+
+---
+
+*Создано в генераторе персонажей для Могучего Татцельвурма*
+`;
+
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+loadCharacter();
+</script>
+</body>
+</html>
